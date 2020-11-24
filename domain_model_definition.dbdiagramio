@@ -1,0 +1,78 @@
+// see https://dbdiagram.io/
+Table user {
+  uid uuidv4 [pk, default: `generate_uuidv4()`, note: 'Universal Unique Identifier Version 4 auto generated']
+  email varchar [not null, unique, note: 'Unique email for user account']
+  password varchar [not null, note: 'Hash Argon2 of password']
+  username varchar [not null, note: 'Name use to mention somebody']
+  fullname varchar [not null, note: 'Name displayed on on profile page']
+  description varchar [note: 'Short description displayed on profile page']
+  picture_profile uuidv4 [note: 'Reference of profile picture']
+  created_at timestamp [default: `now()`, note: 'timestamp of account creation']
+  // > many-to-one; < one-to-many; - one-to-one
+  code_country char(2) [note: 'Code du pays norme ISO 3166-alpha-2']
+}
+
+Table follow {
+  uid_user uuidv4 [pk, ref: > user.uid]
+  follow_uid_user uuidv4 [pk, ref: > user.uid]
+  created_at timestamp [default: `now()`]
+}
+
+Table post {
+  uid uuidv4 [pk, default: `generate_uuidv4()`]
+  text varchar [not null]
+  uid_user uuidv4 [ref: > user.uid]
+  url_image uuidv4[] [note: 'Tableau d\'image de taille maximale 4']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table tag_post {
+  uid_post uuidv4 [ref: > post.uid]
+  uid_tag uuidv4 [ref: > tag.uid]
+}
+
+Table tag {
+  uid uuidv4 [pk, default: `generate_uuidv4()`]
+  text varchar [not null, note: 'Nom du tag, d\'une taille maximale de 12']
+  color varchar [default: "white", note: 'Couleur du tag selon la norme X11']
+  created_at timestamp [default: `now()`]
+}
+
+Table comment {
+  uid uuidv4 [pk, default: `generate_uuidv4()`]
+  text varchar [not null]
+  uid_user uuidv4 [ref: > user.uid]
+  uid_post uuidv4 [ref: > post.uid]
+  url_image uuidv4[] [note: 'Tableau d\'image de taille maximale 4']
+  created_at timestamp [default: `now()`]
+}
+
+// --- REDIS FEATURE ---
+Table REDIS_user_status {
+  uid_user uuidv4 [ref: > user.uid]
+  text varchar
+}
+
+Table REDIS_post_status {
+  uid_post uuidv4 [ref: > post.uid]
+  counter_view int
+  counter_like int
+  counter_share int
+  reaction int[]
+}
+
+// --- FUTURE FEATURE ---
+
+Table FUTURE_FEATURE_community {
+  uid uuidv4 [pk, default: `generate_uuidv4()`]
+  name varchar [not null]
+  description varchar [not null]
+  created_at timestamp [default: `now()`]
+}
+
+Table FUTURE_FEATURE_assignement {
+  uid_user uuidv4 
+  uid_group uuidv4
+  created_at timestamp [default: `now()`]
+}
